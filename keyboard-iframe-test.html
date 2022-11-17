@@ -43,6 +43,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       </p>
     </details>
   </header>
+  <p>Text field in main page:</p>
+  <input type="text" value="text field in main page">
+  <p>Text field in third-party iframe:</p>
+  <iframe width="100%" height="300" src="https://cabanier.github.io/webxr-samples-1/text_focus_timer.html" allowfullscreen="allowfullscreen" allowpaymentrequest frameborder="0"></iframe>
   <script type="module">
     import { WebXRButton } from './js/util/webxr-button.js';
     import { Scene, WebXRView } from './js/render/scenes/scene.js';
@@ -81,10 +85,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     let renderingContext = null;
     let fillStyles = ["silver", "gray", "white", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua"];
     let currentFillStyle = "white";
-    
-    // These two flags are unique to this sample and are not required for the system keyboard to work. For convenience, this sample triggers the keyboard on any background click. There is a race condition between the Select lifecycle events and visibility-changing when clicking on the background to dismiss the keyboard. These two flags handle that.
-    let selectInProgress = false;
-    let skipNextFocus = false;
 
     function initXR() {
       xrButton = new WebXRButton({
@@ -168,6 +168,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         textField.oninput = function() {
           currentFillStyle = fillStyles[Math.floor(Math.random() * fillStyles.length)];
         };
+        textField.onfocus = function() {
+          console.log("textField was focused");
+        };
+        textField.onblur = function() {
+          console.log("textField was blured");
+        };
         document.body.appendChild(textField);
 
         canvas = document.createElement('canvas');
@@ -178,34 +184,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       });
 
       session.addEventListener('selectstart', onSelectStart);
-      session.addEventListener('select', onSelect);
       session.addEventListener('selectend', onSelectEnd);
-      session.addEventListener('visibilitychange', e => {
-        if (e.session.visibilityState === 'visible' && document.activeElement === textField) {
-          textField.blur();
-        }
-      });
     }
 
     function onSelectStart(ev) {
-      selectInProgress = true;
-    }
-
-    function onSelect(ev) {
-      selectInProgress = false;
       if (document.activeElement === textField) {
         textField.blur();
-      } else if (!skipNextFocus) {
-        textField.focus();
       }
-      skipNextFocus = false;
+      // textField.focus();
     }
 
     function onSelectEnd(ev) {
-      if (selectInProgress) {
-        // select lifecycle was short-circuited by visibility-change
-        skipNextFocus = true;
-      }
+      // if (document.activeElement === textField) {
+      //   textField.blur();
+      // }
+      textField.focus();
     }
 
     function onEndSession() {
