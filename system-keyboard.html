@@ -159,17 +159,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         session.updateRenderState({ layers: [cyldLayer, projLayer] });
 
-        textField = document.createElement("input");
-        textField.type = "text";
-        textField.value = "Click anywhere to show the system keyboard"
-        if (!session.isSystemKeyboardSupported) {
-          textField.value = "System keyboard is not supported"
-        }
-        textField.oninput = function() {
-          currentFillStyle = fillStyles[Math.floor(Math.random() * fillStyles.length)];
-        };
-        document.body.appendChild(textField);
-
         canvas = document.createElement('canvas');
         canvas.width = cyldTextureWidth;
         canvas.height = cyldTextureHeight;
@@ -177,34 +166,44 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         session.requestAnimationFrame(onXRFrame);
       });
 
+      textField = document.createElement("input");
+      textField.type = "text";
+      textField.value = "Click anywhere to show the system keyboard"
+      if (!session.isSystemKeyboardSupported) {
+        textField.value = "System keyboard is not supported"
+      }
+      textField.oninput = function() {
+        currentFillStyle = fillStyles[Math.floor(Math.random() * fillStyles.length)];
+      };
+      document.body.appendChild(textField);
+
       session.addEventListener('selectstart', onSelectStart);
       session.addEventListener('select', onSelect);
-      session.addEventListener('selectend', onSelectEnd);
       session.addEventListener('visibilitychange', e => {
-        if (e.session.visibilityState === 'visible' && document.activeElement === textField) {
+        if (e.session.visibilityState === 'visible') {
           textField.blur();
+        } else if (e.session.visibilityState === 'visible-blurred') {
+          // reset flags on keyboard shown
+          selectInProgress = false;
+          skipNextFocus = false;
         }
       });
     }
 
     function onSelectStart(ev) {
+      if (selectInProgress) {
+        // previous select lifecycle was short-circuited
+        skipNextFocus = true;
+      }
       selectInProgress = true;
     }
 
     function onSelect(ev) {
       selectInProgress = false;
-      if (document.activeElement === textField) {
-        textField.blur();
-      } else if (!skipNextFocus) {
+      if (skipNextFocus) {
+        skipNextFocus = false;
+      } else {
         textField.focus();
-      }
-      skipNextFocus = false;
-    }
-
-    function onSelectEnd(ev) {
-      if (selectInProgress) {
-        // select lifecycle was short-circuited by visibility-change
-        skipNextFocus = true;
       }
     }
 
