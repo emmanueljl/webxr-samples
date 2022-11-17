@@ -179,15 +179,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
       session.addEventListener('selectstart', onSelectStart);
       session.addEventListener('select', onSelect);
-      session.addEventListener('visibilitychange', e => {
-        if (e.session.visibilityState === 'visible') {
-          textField.blur();
-        } else if (e.session.visibilityState === 'visible-blurred') {
-          // reset flags on keyboard shown
-          selectInProgress = false;
-          skipNextFocus = false;
-        }
-      });
+      session.addEventListener('visibilitychange', onVisibilityChange);
     }
 
     function onSelectStart(ev) {
@@ -200,10 +192,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     function onSelect(ev) {
       selectInProgress = false;
+
       if (skipNextFocus) {
         skipNextFocus = false;
+
+        if (document.activeElement === textField) {
+          textField.blur();
+        }
       } else {
         textField.focus();
+      }
+    }
+
+    function onVisibilityChange(ev) {
+      if (ev.session.visibilityState === 'visible' && document.activeElement === textField) {
+        textField.blur();
+      } else if (ev.session.visibilityState === 'visible-blurred') {
+        // reset flags on keyboard shown
+        selectInProgress = false;
+        skipNextFocus = false;
       }
     }
 
