@@ -82,9 +82,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     let fillStyles = ["silver", "gray", "white", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua"];
     let currentFillStyle = "white";
     
-    // These two flags are unique to this sample and are not required for the system keyboard to work. For convenience, this sample triggers the keyboard on any background click. There is a race condition between the Select lifecycle events and visibility-changing when clicking on the background to dismiss the keyboard. These two flags handle that.
-    let selectInProgress = false;
-    let skipNextFocus = false;
+    // These flags are unique to this sample and are not required for the system keyboard to work. For convenience, this sample triggers the keyboard on any background click. There is a race condition between the Select lifecycle events and visibility-changing when clicking on the background to dismiss the keyboard.
+    let selectInProgress = false; // check for a proper handoff between onSelectStart and onSelect
+    let skipNextFocus = false; // ignore one keyboard trigger if Select lifecycle was interrupted
+    let sessionVisible = true; // only trigger keyboard if Select was called after session is visible again
 
     function initXR() {
       xrButton = new WebXRButton({
@@ -195,20 +196,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
       if (skipNextFocus) {
         skipNextFocus = false;
-
-        if (document.activeElement === textField) {
-          textField.blur();
-        }
-      } else {
+      } else if (sessionVisible) {
         textField.focus();
       }
     }
 
     function onVisibilityChange(ev) {
-      if (ev.session.visibilityState === 'visible' && document.activeElement === textField) {
-        textField.blur();
-      } else if (ev.session.visibilityState === 'visible-blurred') {
-        // reset flags on keyboard shown
+      if (ev.session.visibilityState === 'visible') {
+        sessionVisible = true;
+      }
+      if (ev.session.visibilityState === 'visible-blurred') {
+        sessionVisible = false;
+
+        // reset flags upon keyboard showing
         selectInProgress = false;
         skipNextFocus = false;
       }
