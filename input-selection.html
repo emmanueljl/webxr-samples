@@ -185,6 +185,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           }
           session.requestAnimationFrame(onXRFrame);
         });
+
+        textField = document.createElement("input");
+        textField.type = "text";
+        textField.value = "Click anywhere to show the system keyboard"
+        if (!session.isSystemKeyboardSupported) {
+          textField.value = "System keyboard is not supported"
+        }
+        textField.oninput = function() {
+          currentFillStyle = fillStyles[Math.floor(Math.random() * fillStyles.length)];
+        };
+        document.body.appendChild(textField);
       }
 
       function onSelectStart(ev) {
@@ -237,6 +248,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           // it is expected that the scale is 1.25 (see onSelectStart). This should make the scale 0.75
           vec3.add(currently_selected_box.scale, currently_selected_box.scale, [-0.5, -0.5, -0.5]);
           currently_selected_box.selected = true;
+
+          textField.focus();
         }
       }
 
