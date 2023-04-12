@@ -75,6 +75,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       scene.addNode(new Gltf2Node({url: 'media/gltf/cube-room/cube-room.gltf'}));
       scene.standingStats(true);
 
+      // Text globals
+      let textField = null;
+
       let boxes = [];
       let currently_selected_boxes = [null, null];
       let currently_grabbed_boxes = [null, null];
@@ -308,6 +311,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (event.session.isImmersive) {
           xrButton.setSession(null);
         }
+
+        textField.remove();
       }
 
       function onXRFrame(time, frame) {
