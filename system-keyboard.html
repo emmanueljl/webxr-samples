@@ -230,6 +230,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     function onXRFrame(time, frame) {
       let pose = frame.getViewerPose(xrRefSpace);
+      scene.startFrame();
       xrSession.requestAnimationFrame(onXRFrame);
 
       renderingContext = canvas.getContext('2d');
@@ -266,6 +267,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
         scene.drawViewArray(views);
       }
+      // scene.drawXRFrame(frame, pose);
       scene.endFrame();
     }
 
